@@ -40,12 +40,15 @@ function removeHeadersInternal($http: AxiosInstance) {
 function defaultTapInternal($http: AxiosInstance, serviceName: string, property: string | number | symbol, withMsgPack = false) {
     return function defaultTrap() {
         const url = `${serviceName}/${String(property)}`
-        const isPost = arguments.length > 0
-        let data: Array<any> | Uint8Array = [...arguments];
-        if (withMsgPack) {
-            data = msgpack.serialize([...arguments]);
-        }
-        return isPost ? $http.post(url, data) : $http.get(url);
+        const isPost = arguments.length > 0;
+        const request = isPost ? $http.post(url, [...arguments]) : $http.get(url);
+        return request.then(result => {
+            if (withMsgPack) {
+                const data = msgpack.deserialize(result.data);
+                return { ...result, data };
+            }
+            return result;
+        })
     }
 }
 
@@ -68,6 +71,7 @@ export function createService<T extends object>({ baseURL, serviceName, withMsgP
         headers: {
             ...(withMsgPack && { 'Content-Type': 'application/msgpack', 'Accept': 'application/json, application/msgpack' })
         },
+        ...(withMsgPack && { responseType: 'arraybuffer' }),
         ...(axiosConfig && axiosConfig)
     });
     return new Proxy<T & BaseService>(baseService as T & BaseService, {
@@ -83,7 +87,7 @@ export function createService<T extends object>({ baseURL, serviceName, withMsgP
             try {
                 var existing = Reflect.get(target, property, reciever)
             } catch (err) {
-                if (err instanceof TypeError) { existing = null; }
+                if (err instanceof TypeError) { existing = false; }
             }
             return existing ?? defaultTapInternal($http, serviceName, property, withMsgPack);
         }
