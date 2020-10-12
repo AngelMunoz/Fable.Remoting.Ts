@@ -87,7 +87,7 @@ export function createService<T extends object>({ baseURL, serviceName, withMsgP
             try {
                 var existing = Reflect.get(target, property, reciever)
             } catch (err) {
-                if (err instanceof TypeError) { existing = false; }
+                if (err instanceof TypeError) { existing = null; }
             }
             return existing ?? defaultTapInternal($http, serviceName, property, withMsgPack);
         }
