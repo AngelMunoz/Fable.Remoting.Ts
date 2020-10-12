@@ -1,6 +1,6 @@
 {
   "name": "fable.remoting.ts",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A TS/JS simple lib to interop with Fable.Remoting",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
