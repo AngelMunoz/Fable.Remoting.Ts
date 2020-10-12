@@ -6,6 +6,11 @@
   "types": "./dist/index.d.ts",
   "type": "module",
   "files": ["dist"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AngelMunoz/Fable.Remoting.Ts"
+  },
+  "licenses": [{"type": "MIT"}],
   "scripts": {
     "build": "tsc -p .",
     "watch": "tsc -p . --watch"

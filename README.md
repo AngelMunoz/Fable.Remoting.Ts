@@ -14,6 +14,8 @@ This library uses ES2015 Proxy so there's no IE support it also uses [Axios] and
 
 ## Usage
 
+> you can also check a sample [here](https://github.com/AngelMunoz/Remotron/blob/master/app.js) and [here](https://github.com/AngelMunoz/Remotron/blob/master/Program.fs#L33)
+
 ```ts
 import { createService } from 'fable.remoting.ts'
 
