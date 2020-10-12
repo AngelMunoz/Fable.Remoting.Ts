@@ -1,0 +1,34 @@
+dependencies:
+  '@ygoe/msgpack': 1.0.2
+  axios: 0.20.0
+devDependencies:
+  typescript: 4.0.3
+lockfileVersion: 5.1
+packages:
+  /@ygoe/msgpack/1.0.2:
+    dev: false
+    resolution:
+      integrity: sha512-GXnUKo8aFiTE1RmhzGXzXNXoN500Zxe0FH62thZi18xI82N+Gcdw9MWjhV0SdTEfjHFwZiw0+ZJSE8sD02pRsQ==
+  /axios/0.20.0:
+    dependencies:
+      follow-redirects: 1.13.0
+    dev: false
+    resolution:
+      integrity: sha512-ANA4rr2BDcmmAQLOKft2fufrtuvlqR+cXNNinUmvfeSNCOF98PZL+7M/v1zIdGo7OLjEA9J2gXJL+j4zGsl0bA==
+  /follow-redirects/1.13.0:
+    dev: false
+    engines:
+      node: '>=4.0'
+    resolution:
+      integrity: sha512-aq6gF1BEKje4a9i9+5jimNFIpq4Q1WiwBToeRK5NvZBd/TRsmW8BsJfOEGkr76TbOyPVD3OVDN910EcUNtRYEA==
+  /typescript/4.0.3:
+    dev: true
+    engines:
+      node: '>=4.2.0'
+    hasBin: true
+    resolution:
+      integrity: sha512-tEu6DGxGgRJPb/mVPIZ48e69xCn2yRmCgYmDugAVwmJ6o+0u1RI18eO7E7WBTLYLaEVVOhwQmcdhQHweux/WPg==
+specifiers:
+  '@ygoe/msgpack': ^1.0.2
+  axios: ^0.20.0
+  typescript: ^4.0.3

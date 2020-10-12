@@ -1,0 +1,23 @@
+{
+  "name": "fable.remoting.ts",
+  "version": "0.1.0",
+  "description": "A TS/JS simple lib to interop with Fable.Remoting",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "type": "module",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p .",
+    "watch": "tsc -p . --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@ygoe/msgpack": "^1.0.2",
+    "axios": "^0.20.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.0.3"
+  }
+}
