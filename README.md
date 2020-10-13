@@ -63,8 +63,8 @@ If you want to have a little bit more of type safety you might want to create an
 
 ```ts
 interface IBooksService {
-    getBooks: () => Promise<Book[]>
-    saveBook: (book: Bool) => Promise<book>
+    getBooks: () => Promise<AxiosResponse<Book[]>>;
+    saveBook: (book: Bool) => Promise<AxiosResponse<Book>>;
 }
 
 const service = createService<IBooksService>({ 
@@ -77,12 +77,13 @@ const service = createService<IBooksService>({
 });
 
 // now you have typescript autocompletition
-service.getBooks()
+const { data } = await service.getBooks();
 // typescript will complain about this
 // service.IDontExist()
-// although if you cast service as "any" it will still try to make the call to 
+// although if you cast service as "any" it will still try to make the call to
 // http://localhost:5000/IBooksService/IDontExist
-// so if you are using pure javascript be careful about this
+// (service as any).IDontExist()
+// so if you are using pure javascript where typos can slip through be careful about this
 
 ```
 
@@ -112,6 +113,8 @@ const service = createService<IBooksService>(
 If you need to provide a new header (or delete) to an existing service instance, you can call 
 - addHeaders
 - removeHeaders
+- addInterceptors
+- removeInterceptors
 methods accordingly 
 
 ```ts
@@ -121,6 +124,13 @@ service.addHeaders({
 });
 // removeHeaders accepts any amount of string parameters
 service.removeHeaders('Authorization', 'x-my-custom-header', ...myOtherHeaders);
+//interceptors
+ const id = service.addInterceptor('request', function logger(v: any) {
+        console.log(v);
+        return v;
+    });
+
+service.removeInterceptor(id);
 ```
 
 ### Augment an existing service
@@ -160,5 +170,23 @@ async function loginAndGetBooks() {
     console.log(service.somePropertyForSomeReason)
 }
 ```
+### Craft your own request
+if nothing of the above works for you for a specific use case, you can always fallback to axios's custom requests
+```ts
+const service = createService({ 
+    // where is your server at?
+    baseURL: 'http://localhost:5000',
+    // this is the name of the service you registered within your server
+    serviceName: 'IBooksService'
+});
 
+const response = await service.createRequest<MyOtherAPIResponse>({
+        url: 'http://my.other.api.com',
+        method: 'DELETE',
+        params: {
+            hello: 'world'
+        }
+    });
+console.log(response.data);
+```
 

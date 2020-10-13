@@ -23,8 +23,15 @@
     "test": "jest --coverage", 
     "test:watch": "jest --coverage --watch"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "fable",
+    "remoting",
+    "fsharp",
+    "fable.remoting.ts",
+    "typescript",
+    "es-proxy"
+  ],
+  "author": "Angel D. Munoz <scythes.lol@gmail.com",
   "license": "ISC",
   "dependencies": {
     "@ygoe/msgpack": "^1.0.2",
