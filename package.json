@@ -1,6 +1,6 @@
 {
   "name": "fable.remoting.ts",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A TS/JS simple lib to interop with Fable.Remoting",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -20,7 +20,8 @@
   "scripts": {
     "build": "tsc -p .",
     "watch": "tsc -p . --watch",
-    "test": "jest --coverage"
+    "test": "jest --coverage", 
+    "test:watch": "jest --coverage --watch"
   },
   "keywords": [],
   "author": "",

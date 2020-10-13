@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from 'axios';
-import { createService } from '../src/index';
+import { createService, RequestInterceptor } from '../src/index';
 
 type GetResult = { url: string; data: number[]; headers: any }
 type GetPostResult = { url: string; data: number[]; postData: any; headers: any };
@@ -12,22 +12,40 @@ type IMyService = {
 
 jest.mock("axios", () => ({
     create(opts: AxiosRequestConfig) {
+        let _interceptors = 0;
         return {
             defaults: {
                 headers: {}
             },
-            headers: {},
+            interceptors: {
+                request: {
+                    use(fulfilled: any, rejected: any) {
+                        return _interceptors++;
+                    },
+                    eject(id: number) { return }
+                },
+                response: {
+                    use(fulfilled: any, rejected: any) {
+                        return _interceptors++;
+                    },
+                    eject(id: number) { return }
+
+                }
+            },
             get(path: string) {
                 const url = opts.baseURL + path
                 // serialized hello world
                 const data = [129, 165, 104, 101, 108, 108, 111, 165, 119, 111, 114, 108, 100];
-                return Promise.resolve({ url, data, headers: { ...this.defaults.headers, ...this.headers } })
+                return Promise.resolve({ url, data, headers: { ...this.defaults.headers } })
             },
             post(path: string, data: any) {
                 const url = opts.baseURL + path
                 // serialized hello world
                 const serializedData = [129, 165, 104, 101, 108, 108, 111, 165, 119, 111, 114, 108, 100]
-                return Promise.resolve({ url, data: serializedData, postData: data, headers: { ...this.defaults.headers, ...this.headers } })
+                return Promise.resolve({ url, data: serializedData, postData: data, headers: { ...this.defaults.headers } })
+            },
+            request<T>(opts: AxiosRequestConfig) {
+                return Promise.resolve({ data: opts as T });
             }
         }
     }
@@ -128,6 +146,20 @@ describe("Service", () => {
         expect(result.postData?.[0]?.sample).toBe('string')
     });
 
+    it("Should create a custom request", async () => {
+        const service = createService<IMyService>({
+            baseURL: 'http://localhost/',
+            serviceName: 'IMyService'
+        });
+        const { data } = await service.createRequest<AxiosRequestConfig>({
+            method: 'DELETE', params: {
+                hello: 'world'
+            }
+        });
+        expect(data.method).toBe('DELETE');
+        expect(data.params).toHaveProperty('hello', 'world');
+    });
+
     describe("Service with MsgPack", () => {
         it("Should have MsgPack Enabled", async () => {
             const service = createService<IMyService>({
@@ -135,8 +167,57 @@ describe("Service", () => {
                 serviceName: 'IMyService',
                 withMsgPack: true
             });
-            const result = await service.postSample({hello: 'world'});
+            const result = await service.postSample({ hello: 'world' });
             expect(result.data).toHaveProperty('hello', 'world');
-        })
+        });
     });
+
+    describe("Service interceptors", () => {
+        it('Should throw without interceptors', () => {
+            const service = createService<IMyService>({
+                baseURL: 'http://localhost/',
+                serviceName: 'IMyService',
+                withMsgPack: true
+            });
+            expect(() => service.addInterceptor('request')).toThrow("No interceptor was provided");
+            expect(() => service.addInterceptor('response')).toThrow("No interceptor was provided");
+        });
+
+        it('Should add interceptors', () => {
+            const service = createService<IMyService>({
+                baseURL: 'http://localhost/',
+                serviceName: 'IMyService'
+            });
+            const id = service.addInterceptor('request', (v: any) => {
+                console.log(v);
+                return v;
+            })
+            const id2 = service.addInterceptor('request', (v: any) => {
+                console.log(v);
+                return v;
+            })
+            const id3 = service.addInterceptor('response', (v: any) => {
+                return v;
+            })
+            const id4 = service.addInterceptor('response', (v: any) => {
+                return v;
+            })
+            expect(id).toBe(0)
+            expect(id2).toBeGreaterThan(0)
+            expect(id3).toBeGreaterThan(0)
+            expect(id4).toBeGreaterThan(0)
+        });
+
+        it('Should remove interceptors', () => {
+            const service = createService<IMyService>({
+                baseURL: 'http://localhost/',
+                serviceName: 'IMyService'
+            });
+            expect(() => service.removeInterceptor('request', 1)).not.toThrow(Error);
+            expect(() => service.removeInterceptor('response', 2)).not.toThrow(Error);
+            expect(() => service.removeInterceptor('request', 3)).not.toThrow(Error);
+            expect(() => service.removeInterceptor('response', 4)).not.toThrow(Error);
+        });
+    });
+
 });
