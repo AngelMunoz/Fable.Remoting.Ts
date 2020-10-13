@@ -3,6 +3,11 @@
 [Axios]: https://github.com/axios/axios
 
 # Fable.Remoting.Ts
+
+![CI](https://github.com/AngelMunoz/Fable.Remoting.Ts/workflows/CI/badge.svg)
+[![npm version](https://img.shields.io/npm/v/fable.remoting.ts)](https://www.npmjs.com/package/fable.remoting.ts)
+
+
 This is a simple proxy-based library that tries to help you interact with your .net server in a simple way.
 
 [Fable.Remoting] is one incredibly nice way to interact with your server where you define your types in a shared project/file and then you just invoke functions based on those declared types.
