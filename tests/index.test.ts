@@ -1,13 +1,13 @@
 import { AxiosRequestConfig } from 'axios';
 import { createService, RequestInterceptor } from '../src/index';
 
-type GetResult = { url: string; data: number[]; headers: any }
-type GetPostResult = { url: string; data: number[]; postData: any; headers: any };
+type GetResult = { url: string; data: number[]; headers: any; };
+type GetPostResult = { url: string; data: number[]; postData: any; headers: any; };
 
 type IMyService = {
-    getSample: () => Promise<GetResult>
-    postSample: (data: any) => Promise<GetPostResult>
-}
+    getSample: () => Promise<GetResult>;
+    postSample: (data: any) => Promise<GetPostResult>;
+};
 
 
 jest.mock("axios", () => ({
@@ -22,34 +22,34 @@ jest.mock("axios", () => ({
                     use(fulfilled: any, rejected: any) {
                         return _interceptors++;
                     },
-                    eject(id: number) { return }
+                    eject(id: number) { return; }
                 },
                 response: {
                     use(fulfilled: any, rejected: any) {
                         return _interceptors++;
                     },
-                    eject(id: number) { return }
+                    eject(id: number) { return; }
 
                 }
             },
             get(path: string) {
-                const url = opts.baseURL + path
+                const url = opts.baseURL + path;
                 // serialized hello world
                 const data = [129, 165, 104, 101, 108, 108, 111, 165, 119, 111, 114, 108, 100];
-                return Promise.resolve({ url, data, headers: { ...this.defaults.headers } })
+                return Promise.resolve({ url, data, headers: { ...this.defaults.headers } });
             },
             post(path: string, data: any) {
-                const url = opts.baseURL + path
+                const url = opts.baseURL + path;
                 // serialized hello world
-                const serializedData = [129, 165, 104, 101, 108, 108, 111, 165, 119, 111, 114, 108, 100]
-                return Promise.resolve({ url, data: serializedData, postData: data, headers: { ...this.defaults.headers } })
+                const serializedData = [129, 165, 104, 101, 108, 108, 111, 165, 119, 111, 114, 108, 100];
+                return Promise.resolve({ url, data: serializedData, postData: data, headers: { ...this.defaults.headers } });
             },
             request<T>(opts: AxiosRequestConfig) {
                 return Promise.resolve({ data: opts as T });
             }
-        }
+        };
     }
-}))
+}));
 
 describe("Service", () => {
     it("Should create a service", () => {
@@ -57,7 +57,7 @@ describe("Service", () => {
             baseURL: 'http://localhost/',
             serviceName: 'IMyService'
         });
-        expect(service).toBeDefined()
+        expect(service).toBeDefined();
         expect(service).toHaveProperty("addHeaders");
         expect(service).toHaveProperty("removeHeaders");
     });
@@ -67,10 +67,10 @@ describe("Service", () => {
             baseURL: 'http://localhost/',
             serviceName: 'IMyService'
         });
-        service.addHeaders({ 'x-custom-header': 'true' })
-        expect(service).toBeDefined()
+        service.addHeaders({ 'x-custom-header': 'true' });
+        expect(service).toBeDefined();
         const result = await service.getSample();
-        expect('x-custom-header' in result.headers).toBeTruthy();
+        expect('x-custom-header' in result.headers.common).toBeTruthy();
     });
 
     it("Should remove headers", async () => {
@@ -80,7 +80,7 @@ describe("Service", () => {
         }, { headers: { 'x-custom-header': 'true' } });
 
         service.removeHeaders('x-custom-header');
-        expect(service).toBeDefined()
+        expect(service).toBeDefined();
         const result = await service.getSample();
         expect('x-custom-header' in result.headers).toBeFalsy();
     });
@@ -92,49 +92,49 @@ describe("Service", () => {
         });
         const result = await service.getSample();
         const result2 = await service.postSample({});
-        expect(result.url).toContain("http://localhost/")
-        expect(result.url).toContain("IMyService")
-        expect(result.url).toContain("getSample")
+        expect(result.url).toContain("http://localhost/");
+        expect(result.url).toContain("IMyService");
+        expect(result.url).toContain("getSample");
 
-        expect(result2.url).toContain("http://localhost/")
-        expect(result2.url).toContain("IMyService")
-        expect(result2.url).toContain("postSample")
+        expect(result2.url).toContain("http://localhost/");
+        expect(result2.url).toContain("IMyService");
+        expect(result2.url).toContain("postSample");
     });
 
     it("Should pick values from existing service", async () => {
-        const existingservice: IMyService & { someProperty: string } = {
+        const existingservice: IMyService & { someProperty: string; } = {
             someProperty: "IExist",
             getSample() {
-                return Promise.resolve({ data: [], url: "", headers: {} })
+                return Promise.resolve({ data: [], url: "", headers: {} });
             },
             postSample(data) {
-                return Promise.resolve({ data: [], url: "", headers: {}, postData: [] })
+                return Promise.resolve({ data: [], url: "", headers: {}, postData: [] });
             }
-        }
-        const service = createService<IMyService & { someProperty: string }>({
+        };
+        const service = createService<IMyService & { someProperty: string; }>({
             baseURL: 'http://localhost/',
             serviceName: 'IMyService'
         }, {}, existingservice);
         expect(service.someProperty).toBe("IExist");
     });
     it("Should fallback gracefully", async () => {
-        const existingservice: IMyService & { someProperty: string } = {
+        const existingservice: IMyService & { someProperty: string; } = {
             someProperty: "IExist",
             getSample() {
-                return Promise.resolve({ data: [], url: "", headers: {} })
+                return Promise.resolve({ data: [], url: "", headers: {} });
             },
             postSample(data) {
-                return Promise.resolve({ data: [], url: "", headers: {}, postData: [] })
+                return Promise.resolve({ data: [], url: "", headers: {}, postData: [] });
             }
-        }
-        const service = createService<IMyService & { someProperty: string }>({
+        };
+        const service = createService<IMyService & { someProperty: string; }>({
             baseURL: 'http://localhost/',
             serviceName: 'IMyService'
         }, {}, existingservice);
         const result = await (service as any).IDontExistAtAll();
-        expect(result.url).toContain("http://localhost/")
-        expect(result.url).toContain("IMyService")
-        expect(result.url).toContain("IDontExistAtAll")
+        expect(result.url).toContain("http://localhost/");
+        expect(result.url).toContain("IMyService");
+        expect(result.url).toContain("IDontExistAtAll");
     });
 
     it("Should post data", async () => {
@@ -143,7 +143,7 @@ describe("Service", () => {
             serviceName: 'IMyService'
         });
         const result = await service.postSample({ sample: "string" });
-        expect(result.postData?.[0]?.sample).toBe('string')
+        expect(result.postData?.[0]?.sample).toBe('string');
     });
 
     it("Should create a custom request", async () => {
@@ -191,21 +191,21 @@ describe("Service", () => {
             const id = service.addInterceptor('request', (v: any) => {
                 console.log(v);
                 return v;
-            })
+            });
             const id2 = service.addInterceptor('request', (v: any) => {
                 console.log(v);
                 return v;
-            })
+            });
             const id3 = service.addInterceptor('response', (v: any) => {
                 return v;
-            })
+            });
             const id4 = service.addInterceptor('response', (v: any) => {
                 return v;
-            })
-            expect(id).toBe(0)
-            expect(id2).toBeGreaterThan(0)
-            expect(id3).toBeGreaterThan(0)
-            expect(id4).toBeGreaterThan(0)
+            });
+            expect(id).toBe(0);
+            expect(id2).toBeGreaterThan(0);
+            expect(id3).toBeGreaterThan(0);
+            expect(id4).toBeGreaterThan(0);
         });
 
         it('Should remove interceptors', () => {

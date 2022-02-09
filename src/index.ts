@@ -1,31 +1,31 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosRequestHeaders } from 'axios';
 import msgpack from '@ygoe/msgpack';
 
 /**
  * this is a helper type that provides extra functionality handled by the service proxy
  */
 export type BaseService = {
-    createRequest<T>(config: AxiosRequestConfig): Promise<AxiosResponse<T>>
-    addHeaders: (headers: Record<string, string>) => void
-    removeHeaders: (...headers: string[]) => void
-    addInterceptor: (type: 'response' | 'request', onFulfilled?: AxiosInterceptor, onRejected?: (error: any) => any) => number
-    removeInterceptor: (type: 'response' | 'request', id: number) => void
-}
+    createRequest<T>(config: AxiosRequestConfig): Promise<AxiosResponse<T>>;
+    addHeaders: (headers: Record<string, string>) => void;
+    removeHeaders: (...headers: string[]) => void;
+    addInterceptor: (type: 'response' | 'request', onFulfilled?: AxiosInterceptor, onRejected?: (error: any) => any) => number;
+    removeInterceptor: (type: 'response' | 'request', id: number) => void;
+};
 
-export type RequestInterceptor = (value: AxiosRequestConfig) => AxiosRequestConfig | Promise<AxiosRequestConfig>
-export type ResponseInterceptor = (value: AxiosResponse<any>) => AxiosResponse<any> | Promise<AxiosResponse<any>>
+export type RequestInterceptor = (value: AxiosRequestConfig) => AxiosRequestConfig | Promise<AxiosRequestConfig>;
+export type ResponseInterceptor = (value: AxiosResponse<any>) => AxiosResponse<any> | Promise<AxiosResponse<any>>;
 export type AxiosInterceptor =
     | RequestInterceptor
-    | ResponseInterceptor
+    | ResponseInterceptor;
 
 /**
  * @param {import('axios').AxiosInstance} $http
  */
 function addHeadersInternal($http: AxiosInstance) {
-    return function addHeaders(headers: Record<string, string>) {
+    return function addHeaders(headers: AxiosRequestHeaders) {
         if (!headers || typeof headers !== 'object') { throw new TypeError('this functioun should have one parameter and it must be an object'); }
-        $http.defaults.headers = { ...$http.defaults.headers, ...headers }
-    }
+        $http.defaults.headers.common = { ...$http.defaults.headers.common, ...headers };
+    };
 }
 
 /**
@@ -35,9 +35,9 @@ function removeHeadersInternal($http: AxiosInstance) {
     return function removeHeaders(...headers: string[]) {
         if (!headers) { throw new TypeError('This function should have at least 1 parameter'); }
         for (const header of headers) {
-            delete $http.defaults.headers[header];
+            delete $http?.defaults?.headers?.common?.[header];
         }
-    }
+    };
 }
 
 function addInterceptorInternal($http: AxiosInstance) {
@@ -45,46 +45,45 @@ function addInterceptorInternal($http: AxiosInstance) {
         if (!onFulfilled && !onRejected) { throw new TypeError("No interceptor was provided"); }
         switch (type) {
             case 'request':
-                return $http.interceptors[type].use(onFulfilled as RequestInterceptor, onRejected)
+                return $http.interceptors[type].use(onFulfilled as RequestInterceptor, onRejected);
             case 'response':
-                return $http.interceptors[type].use(onFulfilled as ResponseInterceptor, onRejected)
+                return $http.interceptors[type].use(onFulfilled as ResponseInterceptor, onRejected);
         }
-    }
+    };
 }
 
 function removeInterceptorInternal($http: AxiosInstance) {
     return function removeInterceptor(type: 'request' | 'response', id: number) {
         return $http.interceptors[type].eject(id);
-    }
+    };
 }
 function createRequestInternal($http: AxiosInstance) {
     return function createRequest<T>(config: AxiosRequestConfig) {
         return $http.request<T>(config);
-    }
+    };
 }
 
 /**
  * @param {import('axios').AxiosInstance} $http
  */
 function defaultTapInternal($http: AxiosInstance, serviceName: string, property: string | number | symbol, withMsgPack = false) {
-    return function defaultTrap(...args: any[]) {
-        const url = `${serviceName}/${String(property)}`
+    return async function defaultTrap(...args: any[]) {
+        const url = `${serviceName}/${String(property)}`;
         const isPost = args.length > 0;
         const request = isPost ? $http.post(url, [...args]) : $http.get(url);
-        return request.then(result => {
-            if (withMsgPack) {
-                const data = msgpack.deserialize(result.data);
-                return { ...result, data };
-            }
-            return result;
-        });
-    }
+        const result = await request;
+        if (withMsgPack) {
+            const data = msgpack.deserialize(result.data);
+            return { ...result, data };
+        }
+        return result;
+    };
 }
 
 type RemotingConfiguration = {
     baseURL: string;
     serviceName: string;
-    withMsgPack: boolean
+    withMsgPack: boolean;
 };
 
 type RemotingConfigParam = Required<Pick<RemotingConfiguration, 'baseURL' | 'serviceName'>> & Partial<RemotingConfiguration>;
@@ -97,11 +96,12 @@ type RemotingConfigParam = Required<Pick<RemotingConfiguration, 'baseURL' | 'ser
 export function createService<T extends object>({ baseURL, serviceName, withMsgPack }: RemotingConfigParam, axiosConfig?: AxiosRequestConfig, baseService: T = {} as T): T & BaseService {
     const $http = axios.create({
         baseURL,
-        headers: {
-            ...(withMsgPack && { 'Content-Type': 'application/msgpack', 'Accept': 'application/json, application/msgpack' })
-        },
         ...(withMsgPack && { responseType: 'arraybuffer' }),
-        ...(axiosConfig && axiosConfig)
+        ...(axiosConfig && axiosConfig),
+        headers: {
+            ...axiosConfig?.headers,
+            ...(withMsgPack && { 'Content-Type': 'application/msgpack', 'Accept': 'application/json,application/msgpack' })
+        },
     });
     return new Proxy<T & BaseService>(baseService as T & BaseService, {
         get(target, property, reciever) {

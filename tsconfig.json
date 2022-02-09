@@ -4,14 +4,25 @@
         "declaration": true,
         "esModuleInterop": true,
         "incremental": true,
-        "module": "ESNext",
+        "module": "ES2020",
         "rootDir": "./src",
         "outDir": "dist",
         "sourceMap": true,
-        "target": "ES2015",
+        "target": "ES2020",
         "moduleResolution": "node",
         "skipLibCheck": true
     },
-    "include": ["./src"],
-    "exclude": ["node_modules", "dist"]
+    "include": [
+        "./src"
+    ],
+    "exclude": [
+        "node_modules",
+        "dist"
+    ],
+    "typeAcquisition": {
+        "enable": true,
+        "include": [
+            "@ygoe/msgpack"
+        ]
+    }
 }
