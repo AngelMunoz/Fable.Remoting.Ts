@@ -14,6 +14,8 @@ This is a simple proxy-based library that tries to help you interact with your .
 
 Sometimes you won't be able (or don't want to) use F# as the client of your F#/C# server and that sadly takes some of the Fable.Remoting Advantages away (apparently) if you enable raw http in Fable.Remoting, then you can use this library to ease some of those interactions
 
+Also you can check these docs to see how you can do it manually https://zaid-ajaj.github.io/Fable.Remoting/src/raw-http.html
+
 # Requirements
 This library uses ES2015 Proxy so there's no IE support it also uses [Axios] and [msgpack.js] so it should be usable both in your browser and any node.js environment
 
